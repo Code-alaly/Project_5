@@ -22,7 +22,6 @@ list	DWORD	ARRAYSIZE DUP (?)
 count	DWORD	ARRAYSIZE
 blank	DWORD	'  ', 0
 sorted	DWORD	ARRAYSIZE
-step	DWORD	0	; tells you what step you are in
 
 ; (insert variable definitions here)
 
@@ -66,7 +65,7 @@ step	DWORD	0	; tells you what step you are in
 	; it passes it to my other calls like count list or display median,
 	; and then those things will do to the array what is needed.
 
-; HOLY SHIT THIS WILL BE LONG. But, leggo yo. 
+;WOWEE WOW THIS WILL BE LONG. But, leggo yo. 
 
 	
 ; what this does, is it takes the list pointer, 
@@ -93,42 +92,46 @@ step	DWORD	0	; tells you what step you are in
 
 .code
 main PROC
-mov		step, 0
-call	random		; 0
+push	OFFSET list		; 4
+push	count
+call	random
+push	OFFSET list
+push	count
+push	20
 call	write
-call	sortList
+push	OFFSET list
+push	count
+; call	sortList
+
 
 
 exit	; exit to operating system
 main ENDP
 ;	
 random PROC
-cmp		step, 0
-ja		body
-push	OFFSET list		; 4
-push	count		; 8
-mov		step, random
-call	iterate	; 12
-jmp		ending
-
-body:
-
+push ebp
+mov ebp,esp
+mov esi,[ebp+12] ;@list
+mov ecx,[ebp+8] ;ecx is loop control
+more:
 mov eax,HI ;31
 sub eax,LO ;31-18 = 13
 inc eax ;14
 call RandomRange ;eax in [0..13]
 add eax,LO ;eax in [18..31]
 mov	[esi], eax
+add esi,4 ;next element
+loop more
+endMore:
+pop ebp
+ret 8
 
-
-ending:
-ret
 random	ENDP
 
 
+COMMENT #
 
-
-iterate PROC
+; iterate PROC
 push ebp
 mov ebp,esp
 mov esi,[ebp+12] ;@list
@@ -143,19 +146,18 @@ mov	step, 0	; at the end of the loopz
 pop ebp
 ret 8
 iterate ENDP
+#
 
 write	PROC
-cmp		step, 0 ; each proc compares step to 0, the first time it's called, it goes to itera
-ja		body
-mov		edx, 20
-push	OFFSET list
-push	count
-mov		step, write
-call	iterate
-mov		step, 0
-jmp		ending
 
-body:
+push ebp
+mov ebp,esp
+mov esi,[ebp+16] ;@list
+mov ecx,[ebp+12] ;ecx is loop control
+mov	edx,[ebp+8]	 ; edx counts how many spaces
+
+more:
+mov eax,[esi] ;get current element
 push	edx ; so we can use it for write
 mov		edx, OFFSET blank
 call	WriteString
@@ -170,34 +172,58 @@ space:
 mov		edx, 20
 call	CrLf
 
-
-
-
 ending:
-ret
+add esi,4 ;next element
+loop more
+endMore:
+; at the end of the loopz
+pop ebp
+ret 12
 write	ENDP
 
+
+
 sortList	PROC
-cmp		step, 0
-ja		body
-mov		edx, 0
-mov		ebx, OFFSET	sorted
-push	OFFSET list		; 4
-push	count		; 8
-mov		step, sortList
-call	iterate	; 12
-mov		step, 0
-jmp		ending
 
-body:
+push ebp
+mov ebp,esp
+mov esi,[ebp+12] ;@list
+mov ecx,[ebp+8] ;ecx is loop control
+more:
+mov eax,[esi] ;get current element
+push	OFFSET	sorted ; for new array of sorted elements
+push	0	; this will be each element in the new array
+call	exchangeElements
+add esi,4 ;next element
+loop more
+endMore:
 
+pop ebp
+ret 8
 
-
-
-ending:
-ret
 
 sortList	ENDP
+
+exchangeElements	PROC
+push ebp
+mov ebp,esp
+mov esi,[ebp+12] ;@list ; this stuff should be the same, cause we pushed some new stuff onto the stack so this is the
+; new 12, 8. it should be 
+mov ecx,[ebp+8] ;ecx is loop control
+more:
+mov eax,[esi] ;get current element
+call step ; 16
+add esi,4 ;next element
+loop more
+endMore:
+mov	step, 0	; at the end of the loopz
+pop ebp
+ret 8
+
+ret	8
+exchangeElements	ENDP
+
+
 
 
 

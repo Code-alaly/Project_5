@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.24.28315.0	    02/20/20 21:37:56
+Microsoft (R) Macro Assembler Version 14.24.28315.0	    02/23/20 18:34:08
 #Program Template     (template.asm			     Page 1 - 1
 
 
@@ -45,7 +45,7 @@ Microsoft (R) Macro Assembler Version 14.24.28315.0	    02/20/20 21:37:56
  00000320 000000C8		count	DWORD	ARRAYSIZE
  00000324 00002020		blank	DWORD	'  ', 0
 	   00000000
- 0000032C 00000000		step	DWORD	0	; tells you what step you are in
+ 0000032C 000000C8		sorted	DWORD	ARRAYSIZE
 
 				; (insert variable definitions here)
 
@@ -116,125 +116,147 @@ Microsoft (R) Macro Assembler Version 14.24.28315.0	    02/20/20 21:37:56
 
  00000000			.code
  00000000			main PROC
- 00000000  C7 05 0000032C R	mov		step, 0
-	   00000000
- 0000000A  E8 00000011		call	random		; 0
- 0000000F  E8 00000069		call	write
- 00000014  E8 000000BC		call	sortList
+ 00000000  68 00000000 R	push	OFFSET list		; 4
+ 00000005  FF 35 00000320 R	push	count
+ 0000000B  E8 00000024		call	random
+ 00000010  68 00000000 R	push	OFFSET list
+ 00000015  FF 35 00000320 R	push	count
+ 0000001B  6A 14		push	20
+ 0000001D  E8 00000037		call	write
+ 00000022  68 00000000 R	push	OFFSET list
+ 00000027  FF 35 00000320 R	push	count
+				; call	sortList
+
 
 
 				exit	; exit to operating system
- 00000019  6A 00	   *	    push   +000000000h
- 0000001B  E8 00000000 E   *	    call   ExitProcess
- 00000020			main ENDP
+ 0000002D  6A 00	   *	    push   +000000000h
+ 0000002F  E8 00000000 E   *	    call   ExitProcess
+ 00000034			main ENDP
 				;	
- 00000020			random PROC
- 00000020  83 3D 0000032C R	cmp		step, 0
-	   00
- 00000027  77 1C		ja		body
- 00000029  68 00000000 R	push	OFFSET list		; 4
- 0000002E  FF 35 00000320 R	push	count		; 8
- 00000034  C7 05 0000032C R	mov		step, random
-	   00000020 R
- 0000003E  E8 00000016		call	iterate	; 12
- 00000043  EB 13		jmp		ending
+ 00000034			random PROC
+ 00000034  55			push ebp
+ 00000035  8B EC		mov ebp,esp
+ 00000037  8B 75 0C		mov esi,[ebp+12] ;@list
+ 0000003A  8B 4D 08		mov ecx,[ebp+8] ;ecx is loop control
+ 0000003D			more:
+ 0000003D  B8 0000001D		mov eax,HI ;31
+ 00000042  83 E8 0A		sub eax,LO ;31-18 = 13
+ 00000045  40			inc eax ;14
+ 00000046  E8 00000000 E	call RandomRange ;eax in [0..13]
+ 0000004B  83 C0 0A		add eax,LO ;eax in [18..31]
+ 0000004E  89 06		mov	[esi], eax
+ 00000050  83 C6 04		add esi,4 ;next element
+ 00000053  E2 E8		loop more
+ 00000055			endMore:
+ 00000055  5D			pop ebp
+ 00000056  C2 0008		ret 8
 
- 00000045			body:
-
- 00000045  B8 0000001D		mov eax,HI ;31
- 0000004A  83 E8 0A		sub eax,LO ;31-18 = 13
- 0000004D  40			inc eax ;14
- 0000004E  E8 00000000 E	call RandomRange ;eax in [0..13]
- 00000053  83 C0 0A		add eax,LO ;eax in [18..31]
- 00000056  89 06		mov	[esi], eax
-
-
- 00000058			ending:
- 00000058  C3			ret
  00000059			random	ENDP
 
 
+				COMMENT #
 
+				; iterate PROC
+				push ebp
+				mov ebp,esp
+				mov esi,[ebp+12] ;@list
+				mov ecx,[ebp+8] ;ecx is loop control
+				more:
+				mov eax,[esi] ;get current element
+				call step ; 16
+				add esi,4 ;next element
+				loop more
+				endMore:
+				mov	step, 0	; at the end of the loopz
+				pop ebp
+				ret 8
+				; iterate ENDP
+				#
 
- 00000059			iterate PROC
+ 00000059			write	PROC
+
  00000059  55			push ebp
  0000005A  8B EC		mov ebp,esp
- 0000005C  8B 75 0C		mov esi,[ebp+12] ;@list
- 0000005F  8B 4D 08		mov ecx,[ebp+8] ;ecx is loop control
- 00000062			more:
- 00000062  8B 06		mov eax,[esi] ;get current element
- 00000064  FF 15 0000032C R	call step ; 16
- 0000006A  83 C6 04		add esi,4 ;next element
- 0000006D  E2 F3		loop more
- 0000006F			endMore:
- 0000006F  C7 05 0000032C R	mov	step, 0	; at the end of the loopz
-	   00000000
- 00000079  5D			pop ebp
- 0000007A  C2 0008		ret 8
- 0000007D			iterate ENDP
+ 0000005C  8B 75 10		mov esi,[ebp+16] ;@list
+ 0000005F  8B 4D 0C		mov ecx,[ebp+12] ;ecx is loop control
+ 00000062  8B 55 08		mov	edx,[ebp+8]	 ; edx counts how many spaces
 
- 0000007D			write	PROC
- 0000007D  83 3D 0000032C R	cmp		step, 0 ; each proc compares step to 0, the first time it's called, it goes to itera
-	   00
- 00000084  77 2B		ja		body
- 00000086  BA 00000014		mov		edx, 20
- 0000008B  68 00000000 R	push	OFFSET list
- 00000090  FF 35 00000320 R	push	count
- 00000096  C7 05 0000032C R	mov		step, write
-	   0000007D R
- 000000A0  E8 FFFFFFB4		call	iterate
- 000000A5  C7 05 0000032C R	mov		step, 0
-	   00000000
- 000000AF  EB 23		jmp		ending
+ 00000065			more:
+ 00000065  8B 06		mov eax,[esi] ;get current element
+ 00000067  52			push	edx ; so we can use it for write
+ 00000068  BA 00000324 R	mov		edx, OFFSET blank
+ 0000006D  E8 00000000 E	call	WriteString
+ 00000072  E8 00000000 E	call	WriteDec
+ 00000077  5A			pop		edx	; so we use it for main function, iteration
+ 00000078  4A			dec		edx
+ 00000079  83 FA 00		cmp		edx, 0
+ 0000007C  74 02		je		space
+ 0000007E  EB 0A		jmp		ending
 
- 000000B1			body:
- 000000B1  52			push	edx ; so we can use it for write
- 000000B2  BA 00000324 R	mov		edx, OFFSET blank
- 000000B7  E8 00000000 E	call	WriteString
- 000000BC  E8 00000000 E	call	WriteDec
- 000000C1  5A			pop		edx	; so we use it for main function, iteration
- 000000C2  4A			dec		edx
- 000000C3  83 FA 00		cmp		edx, 0
- 000000C6  74 02		je		space
- 000000C8  EB 0A		jmp		ending
+ 00000080			space:
+ 00000080  BA 00000014		mov		edx, 20
+ 00000085  E8 00000000 E	call	CrLf
 
- 000000CA			space:
- 000000CA  BA 00000014		mov		edx, 20
- 000000CF  E8 00000000 E	call	CrLf
+ 0000008A			ending:
+ 0000008A  83 C6 04		add esi,4 ;next element
+ 0000008D  E2 D6		loop more
+ 0000008F			endMore:
+				; at the end of the loopz
+ 0000008F  5D			pop ebp
+ 00000090  C2 000C		ret 12
+ 00000093			write	ENDP
 
 
+				COMMENT #
+				sortList	PROC
+
+				push ebp
+				mov ebp,esp
+				mov esi,[ebp+12] ;@list
+				mov ecx,[ebp+8] ;ecx is loop control
+				more:
+				mov eax,[esi] ;get current element
+				push	OFFSET	sorted ; for new array of sorted elements
+				push	0	; this will be each element in the new array
+				call	exchangeElements
+				add esi,4 ;next element
+				loop more
+				endMore:
+
+				pop ebp
+				ret 8
 
 
- 000000D4			ending:
- 000000D4  C3			ret
- 000000D5			write	ENDP
+				sortList	ENDP
 
- 000000D5			sortList	PROC
- 000000D5  83 3D 0000032C R	cmp		step, 0
-	   00
- 000000DC  77 26		ja		body
- 000000DE  68 00000000 R	push	OFFSET list		; 4
- 000000E3  FF 35 00000320 R	push	count		; 8
- 000000E9  C7 05 0000032C R	mov		step, random
-	   00000020 R
- 000000F3  E8 FFFFFF61		call	iterate	; 12
- 000000F8  C7 05 0000032C R	mov		step, 0
-	   00000000
- 00000102  EB 00		jmp		ending
+				exchangeElements	PROC
+				push ebp
+				mov ebp,esp
+				mov esi,[ebp+12] ;@list ; this stuff should be the same, cause we pushed some new stuff onto the stack so this is the
+				; new 12, 8. it should be 
+				mov ecx,[ebp+8] ;ecx is loop control
+				more:
+				mov eax,[esi] ;get current element
+				call step ; 16
+				add esi,4 ;next element
+				loop more
+				endMore:
+				mov	step, 0	; at the end of the loopz
+				pop ebp
+				ret 8
 
- 00000104			body:
+				ret	8
+				exchangeElements	ENDP
 
- 00000104			ending:
- 00000104  C3			ret
-
- 00000105			sortList	ENDP
+				#
 
 
 
 				; (insert additional procedures here)
 
 				END main
-Microsoft (R) Macro Assembler Version 14.24.28315.0	    02/20/20 21:37:56
+Microsoft (R) Macro Assembler Version 14.24.28315.0	    02/23/20 18:34:08
 #Program Template     (template.asm			     Symbols 2 - 1
 
 
@@ -329,7 +351,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000330 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000105 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000093 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -436,22 +458,17 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-iterate  . . . . . . . . . . . .	P Near	 00000059 _TEXT	Length= 00000024 Public STDCALL
-  more . . . . . . . . . . . . .	L Near	 00000062 _TEXT	
-  endMore  . . . . . . . . . . .	L Near	 0000006F _TEXT	
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000020 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000034 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-random . . . . . . . . . . . . .	P Near	 00000020 _TEXT	Length= 00000039 Public STDCALL
-  body . . . . . . . . . . . . .	L Near	 00000045 _TEXT	
-  ending . . . . . . . . . . . .	L Near	 00000058 _TEXT	
+random . . . . . . . . . . . . .	P Near	 00000034 _TEXT	Length= 00000025 Public STDCALL
+  more . . . . . . . . . . . . .	L Near	 0000003D _TEXT	
+  endMore  . . . . . . . . . . .	L Near	 00000055 _TEXT	
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-sortList . . . . . . . . . . . .	P Near	 000000D5 _TEXT	Length= 00000030 Public STDCALL
-  body . . . . . . . . . . . . .	L Near	 00000104 _TEXT	
-  ending . . . . . . . . . . . .	L Near	 00000104 _TEXT	
-write  . . . . . . . . . . . . .	P Near	 0000007D _TEXT	Length= 00000058 Public STDCALL
-  body . . . . . . . . . . . . .	L Near	 000000B1 _TEXT	
-  space  . . . . . . . . . . . .	L Near	 000000CA _TEXT	
-  ending . . . . . . . . . . . .	L Near	 000000D4 _TEXT	
+write  . . . . . . . . . . . . .	P Near	 00000059 _TEXT	Length= 0000003A Public STDCALL
+  more . . . . . . . . . . . . .	L Near	 00000065 _TEXT	
+  space  . . . . . . . . . . . .	L Near	 00000080 _TEXT	
+  ending . . . . . . . . . . . .	L Near	 0000008A _TEXT	
+  endMore  . . . . . . . . . . .	L Near	 0000008F _TEXT	
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 
@@ -689,7 +706,7 @@ lightRed . . . . . . . . . . . .	Number	 0000000Ch
 list . . . . . . . . . . . . . .	DWord	 00000000 _DATA	
 magenta  . . . . . . . . . . . .	Number	 00000005h   
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-step . . . . . . . . . . . . . .	DWord	 0000032C _DATA	
+sorted . . . . . . . . . . . . .	DWord	 0000032C _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
