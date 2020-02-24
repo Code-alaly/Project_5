@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.24.28315.0	    02/23/20 18:34:08
+Microsoft (R) Macro Assembler Version 14.24.28314.0	    02/24/20 15:38:26
 #Program Template     (template.asm			     Page 1 - 1
 
 
@@ -89,7 +89,7 @@ Microsoft (R) Macro Assembler Version 14.24.28315.0	    02/23/20 18:34:08
 					; it passes it to my other calls like count list or display median,
 					; and then those things will do to the array what is needed.
 
-				; HOLY SHIT THIS WILL BE LONG. But, leggo yo. 
+				;WOWEE WOW THIS WILL BE LONG. But, leggo yo. 
 
 					
 				; what this does, is it takes the list pointer, 
@@ -118,41 +118,42 @@ Microsoft (R) Macro Assembler Version 14.24.28315.0	    02/23/20 18:34:08
  00000000			main PROC
  00000000  68 00000000 R	push	OFFSET list		; 4
  00000005  FF 35 00000320 R	push	count
- 0000000B  E8 00000024		call	random
+ 0000000B  E8 00000029		call	random
  00000010  68 00000000 R	push	OFFSET list
  00000015  FF 35 00000320 R	push	count
  0000001B  6A 14		push	20
- 0000001D  E8 00000037		call	write
- 00000022  68 00000000 R	push	OFFSET list
+ 0000001D  E8 0000003C		call	write
+ 00000022  68 00000000 R	push	OFFSET list		; 4
  00000027  FF 35 00000320 R	push	count
+ 0000002D  E8 00000067		call	sortList
 				; call	sortList
 
 
 
 				exit	; exit to operating system
- 0000002D  6A 00	   *	    push   +000000000h
- 0000002F  E8 00000000 E   *	    call   ExitProcess
- 00000034			main ENDP
+ 00000032  6A 00	   *	    push   +000000000h
+ 00000034  E8 00000000 E   *	    call   ExitProcess
+ 00000039			main ENDP
 				;	
- 00000034			random PROC
- 00000034  55			push ebp
- 00000035  8B EC		mov ebp,esp
- 00000037  8B 75 0C		mov esi,[ebp+12] ;@list
- 0000003A  8B 4D 08		mov ecx,[ebp+8] ;ecx is loop control
- 0000003D			more:
- 0000003D  B8 0000001D		mov eax,HI ;31
- 00000042  83 E8 0A		sub eax,LO ;31-18 = 13
- 00000045  40			inc eax ;14
- 00000046  E8 00000000 E	call RandomRange ;eax in [0..13]
- 0000004B  83 C0 0A		add eax,LO ;eax in [18..31]
- 0000004E  89 06		mov	[esi], eax
- 00000050  83 C6 04		add esi,4 ;next element
- 00000053  E2 E8		loop more
- 00000055			endMore:
- 00000055  5D			pop ebp
- 00000056  C2 0008		ret 8
+ 00000039			random PROC
+ 00000039  55			push ebp
+ 0000003A  8B EC		mov ebp,esp
+ 0000003C  8B 75 0C		mov esi,[ebp+12] ;@list
+ 0000003F  8B 4D 08		mov ecx,[ebp+8] ;ecx is loop control
+ 00000042			randomLoop:
+ 00000042  B8 0000001D		mov eax,HI ;31
+ 00000047  83 E8 0A		sub eax,LO ;31-18 = 13
+ 0000004A  40			inc eax ;14
+ 0000004B  E8 00000000 E	call RandomRange ;eax in [0..13]
+ 00000050  83 C0 0A		add eax,LO ;eax in [18..31]
+ 00000053  89 06		mov	[esi], eax
+ 00000055  83 C6 04		add esi,4 ;next element
+ 00000058  E2 E8		loop randomLoop
+ 0000005A			RandomEnd:
+ 0000005A  5D			pop ebp
+ 0000005B  C2 0008		ret 8
 
- 00000059			random	ENDP
+ 0000005E			random	ENDP
 
 
 				COMMENT #
@@ -171,92 +172,111 @@ Microsoft (R) Macro Assembler Version 14.24.28315.0	    02/23/20 18:34:08
 				mov	step, 0	; at the end of the loopz
 				pop ebp
 				ret 8
-				; iterate ENDP
+				iterate ENDP
 				#
 
- 00000059			write	PROC
+ 0000005E			write	PROC
 
- 00000059  55			push ebp
- 0000005A  8B EC		mov ebp,esp
- 0000005C  8B 75 10		mov esi,[ebp+16] ;@list
- 0000005F  8B 4D 0C		mov ecx,[ebp+12] ;ecx is loop control
- 00000062  8B 55 08		mov	edx,[ebp+8]	 ; edx counts how many spaces
+ 0000005E  55			push ebp
+ 0000005F  8B EC		mov ebp,esp
+ 00000061  8B 75 10		mov esi,[ebp+16] ;@list
+ 00000064  8B 4D 0C		mov ecx,[ebp+12] ;ecx is loop control
+ 00000067  8B 55 08		mov	edx,[ebp+8]	 ; edx counts how many spaces
 
- 00000065			more:
- 00000065  8B 06		mov eax,[esi] ;get current element
- 00000067  52			push	edx ; so we can use it for write
- 00000068  BA 00000324 R	mov		edx, OFFSET blank
- 0000006D  E8 00000000 E	call	WriteString
- 00000072  E8 00000000 E	call	WriteDec
- 00000077  5A			pop		edx	; so we use it for main function, iteration
- 00000078  4A			dec		edx
- 00000079  83 FA 00		cmp		edx, 0
- 0000007C  74 02		je		space
- 0000007E  EB 0A		jmp		ending
+ 0000006A			writeLoop:
+ 0000006A  8B 06		mov eax,[esi] ;get current element
+ 0000006C  52			push	edx ; so we can use it for write
+ 0000006D  BA 00000324 R	mov		edx, OFFSET blank
+ 00000072  E8 00000000 E	call	WriteString
+ 00000077  E8 00000000 E	call	WriteDec
+ 0000007C  5A			pop		edx	; so we use it for main function, iteration
+ 0000007D  4A			dec		edx
+ 0000007E  83 FA 00		cmp		edx, 0
+ 00000081  74 02		je		space
+ 00000083  EB 0A		jmp		ending
 
- 00000080			space:
- 00000080  BA 00000014		mov		edx, 20
- 00000085  E8 00000000 E	call	CrLf
+ 00000085			space:
+ 00000085  BA 00000014		mov		edx, 20
+ 0000008A  E8 00000000 E	call	CrLf
 
- 0000008A			ending:
- 0000008A  83 C6 04		add esi,4 ;next element
- 0000008D  E2 D6		loop more
- 0000008F			endMore:
+ 0000008F			ending:
+ 0000008F  83 C6 04		add esi,4 ;next element
+				loop more
+template.asm(178) : error A2006:undefined symbol : more
+ 00000095			writeEnd:
 				; at the end of the loopz
- 0000008F  5D			pop ebp
- 00000090  C2 000C		ret 12
- 00000093			write	ENDP
+ 00000095  5D			pop ebp
+ 00000096  C2 000C		ret 12
+ 00000099			write	ENDP
 
 
-				COMMENT #
-				sortList	PROC
 
-				push ebp
-				mov ebp,esp
-				mov esi,[ebp+12] ;@list
-				mov ecx,[ebp+8] ;ecx is loop control
-				more:
-				mov eax,[esi] ;get current element
-				push	OFFSET	sorted ; for new array of sorted elements
-				push	0	; this will be each element in the new array
-				call	exchangeElements
-				add esi,4 ;next element
-				loop more
-				endMore:
+ 00000099sortList	PROC
 
-				pop ebp
-				ret 8
+ 00000099  55			push ebp
+ 0000009A  8B EC		mov ebp,esp
+ 0000009C  8B 75 0C		mov esi,[ebp+12] ;@list
+ 0000009F  8B 4D 08		mov ecx,[ebp+8] ;ecx is how far up to go
+ 000000A2  83 C6 04		add	esi, 4		; starts on the second element
+ 000000A5  B8 00000001		mov	eax, 1 ; eax will be counter
+ 000000AA			sortLoop:
+ 000000AA  3B C1		cmp		eax, ecx	; if we've gone through, it's done sorting
+ 000000AC  7D 0D		jge		endSort
+ 000000AE  50			push	eax
+ 000000AF  56			push	esi
+ 000000B0  E8 0000000A		call	exchangeElements
+ 000000B5  40			inc		eax
+ 000000B6  83 C6 04		add		esi,4 ;next element
+ 000000B9  EB EF		jmp	sortLoop
+ 000000BB			endSort:
+
+ 000000BB  5D			pop ebp
+ 000000BC  C2 0008		ret 8
 
 
-				sortList	ENDP
+ 000000BF			sortList	ENDP
 
-				exchangeElements	PROC
-				push ebp
-				mov ebp,esp
-				mov esi,[ebp+12] ;@list ; this stuff should be the same, cause we pushed some new stuff onto the stack so this is the
-				; new 12, 8. it should be 
-				mov ecx,[ebp+8] ;ecx is loop control
-				more:
-				mov eax,[esi] ;get current element
-				call step ; 16
-				add esi,4 ;next element
-				loop more
-				endMore:
-				mov	step, 0	; at the end of the loopz
-				pop ebp
-				ret 8
+ 000000BF			exchangeElements	PROC
 
-				ret	8
-				exchangeElements	ENDP
 
-				#
+ 000000BF			exchangeLoop:
+ 000000BF  8B 1E		mov		ebx, [esi] ; put current value in ebx
+ 000000C1  8B 56 FC		mov		edx, [esi-4] ; put value before in edx
+ 000000C4  83 F8 00		cmp		eax, 0
+				je		endExcange
+template.asm(219) : error A2006:undefined symbol : endExcange
+
+ 000000C7  3B D3		cmp	edx, ebx
+ 000000C9  7D 0B		jge	switch
+ 000000CB  EB 0D		jmp	nextInt
+
+ 000000D6			switch:
+ 000000D6  53			push	ebx
+ 000000D7  52			push	edx
+ 000000D8  5B			pop		ebx
+ 000000D9  5A			pop		edx
+
+ 000000DA			nextInt:
+ 000000DA  48			dec		eax
+ 000000DB  83 C6 04		add		esi, 4
+ 000000DE  EB DF		jmp		exchangeLoop
+
+
+ 000000E0			endExchange:
+ 000000E0  5E			pop		esi
+ 000000E1  58			pop		eax
+ 000000E2  C3			ret 
+
+ 000000E3			exchangeElements	ENDP
+
+
 
 
 
 				; (insert additional procedures here)
 
 				END main
-Microsoft (R) Macro Assembler Version 14.24.28315.0	    02/23/20 18:34:08
+Microsoft (R) Macro Assembler Version 14.24.28314.0	    02/24/20 15:38:26
 #Program Template     (template.asm			     Symbols 2 - 1
 
 
@@ -351,7 +371,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000330 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000093 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000E3 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -458,17 +478,25 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000034 Public STDCALL
+exchangeElements . . . . . . . .	P Near	 000000BF _TEXT	Length= 00000024 Public STDCALL
+  exchangeLoop . . . . . . . . .	L Near	 000000BF _TEXT	
+  switch . . . . . . . . . . . .	L Near	 000000D6 _TEXT	
+  nextInt  . . . . . . . . . . .	L Near	 000000DA _TEXT	
+  endExchange  . . . . . . . . .	L Near	 000000E0 _TEXT	
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000039 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-random . . . . . . . . . . . . .	P Near	 00000034 _TEXT	Length= 00000025 Public STDCALL
-  more . . . . . . . . . . . . .	L Near	 0000003D _TEXT	
-  endMore  . . . . . . . . . . .	L Near	 00000055 _TEXT	
+random . . . . . . . . . . . . .	P Near	 00000039 _TEXT	Length= 00000025 Public STDCALL
+  randomLoop . . . . . . . . . .	L Near	 00000042 _TEXT	
+  RandomEnd  . . . . . . . . . .	L Near	 0000005A _TEXT	
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-write  . . . . . . . . . . . . .	P Near	 00000059 _TEXT	Length= 0000003A Public STDCALL
-  more . . . . . . . . . . . . .	L Near	 00000065 _TEXT	
-  space  . . . . . . . . . . . .	L Near	 00000080 _TEXT	
-  ending . . . . . . . . . . . .	L Near	 0000008A _TEXT	
-  endMore  . . . . . . . . . . .	L Near	 0000008F _TEXT	
+sortList . . . . . . . . . . . .	P Near	 00000099 _TEXT	Length= 00000026 Public STDCALL
+  sortLoop . . . . . . . . . . .	L Near	 000000AA _TEXT	
+  endSort  . . . . . . . . . . .	L Near	 000000BB _TEXT	
+write  . . . . . . . . . . . . .	P Near	 0000005E _TEXT	Length= 0000003B Public STDCALL
+  writeLoop  . . . . . . . . . .	L Near	 0000006A _TEXT	
+  space  . . . . . . . . . . . .	L Near	 00000085 _TEXT	
+  ending . . . . . . . . . . . .	L Near	 0000008F _TEXT	
+  writeEnd . . . . . . . . . . .	L Near	 00000095 _TEXT	
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 
@@ -712,4 +740,4 @@ wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
 
 	   0 Warnings
-	   0 Errors
+	   2 Errors

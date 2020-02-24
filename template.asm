@@ -99,8 +99,9 @@ push	OFFSET list
 push	count
 push	20
 call	write
-push	OFFSET list
+push	OFFSET list		; 4
 push	count
+call	sortList
 ; call	sortList
 
 
@@ -113,7 +114,7 @@ push ebp
 mov ebp,esp
 mov esi,[ebp+12] ;@list
 mov ecx,[ebp+8] ;ecx is loop control
-more:
+randomLoop:
 mov eax,HI ;31
 sub eax,LO ;31-18 = 13
 inc eax ;14
@@ -121,8 +122,8 @@ call RandomRange ;eax in [0..13]
 add eax,LO ;eax in [18..31]
 mov	[esi], eax
 add esi,4 ;next element
-loop more
-endMore:
+loop randomLoop
+RandomEnd:
 pop ebp
 ret 8
 
@@ -156,7 +157,7 @@ mov esi,[ebp+16] ;@list
 mov ecx,[ebp+12] ;ecx is loop control
 mov	edx,[ebp+8]	 ; edx counts how many spaces
 
-more:
+writeLoop:
 mov eax,[esi] ;get current element
 push	edx ; so we can use it for write
 mov		edx, OFFSET blank
@@ -175,7 +176,7 @@ call	CrLf
 ending:
 add esi,4 ;next element
 loop more
-endMore:
+writeEnd:
 ; at the end of the loopz
 pop ebp
 ret 12
@@ -188,15 +189,19 @@ sortList	PROC
 push ebp
 mov ebp,esp
 mov esi,[ebp+12] ;@list
-mov ecx,[ebp+8] ;ecx is loop control
-more:
-mov eax,[esi] ;get current element
-push	OFFSET	sorted ; for new array of sorted elements
-push	0	; this will be each element in the new array
+mov ecx,[ebp+8] ;ecx is how far up to go
+add	esi, 4		; starts on the second element
+mov	eax, 1 ; eax will be counter
+sortLoop:
+cmp		eax, ecx	; if we've gone through, it's done sorting
+jge		endSort
+push	eax
+push	esi
 call	exchangeElements
-add esi,4 ;next element
-loop more
-endMore:
+inc		eax
+add		esi,4 ;next element
+jmp	sortLoop
+endSort:
 
 pop ebp
 ret 8
@@ -205,22 +210,35 @@ ret 8
 sortList	ENDP
 
 exchangeElements	PROC
-push ebp
-mov ebp,esp
-mov esi,[ebp+12] ;@list ; this stuff should be the same, cause we pushed some new stuff onto the stack so this is the
-; new 12, 8. it should be 
-mov ecx,[ebp+8] ;ecx is loop control
-more:
-mov eax,[esi] ;get current element
-call step ; 16
-add esi,4 ;next element
-loop more
-endMore:
-mov	step, 0	; at the end of the loopz
-pop ebp
-ret 8
 
-ret	8
+
+exchangeLoop:
+mov		ebx, [esi] ; put current value in ebx
+mov		edx, [esi-4] ; put value before in edx
+cmp		eax, 0
+je		endExcange
+
+cmp	edx, ebx
+jge	switch
+jmp	nextInt
+
+switch:
+push	ebx
+push	edx
+pop		ebx
+pop		edx
+
+nextInt:
+dec		eax
+add		esi, 4
+jmp		exchangeLoop
+
+
+endExchange:
+pop		esi
+pop		eax
+ret 
+
 exchangeElements	ENDP
 
 
