@@ -60,11 +60,6 @@ sorted	BYTE	"Here is the array as a sorted array", 0
 	; is 0 so you'll be able to math that out, at the end, display
 	; it
 
-; iterateList
-	; I'm thinking I'll have a proc that basically just starts at the 
-	; array, and goes through it, and then when it gets the next value
-	; it passes it to my other calls like count list or display median,
-	; and then those things will do to the array what is needed.
 
 ;WOWEE WOW THIS WILL BE LONG. But, leggo yo. 
 
@@ -75,21 +70,7 @@ sorted	BYTE	"Here is the array as a sorted array", 0
 ; in the array and prints it out, until it gets to the end of 
 ; whats in counter. 
 
-; WHAT you've gotta do
-; generate an array of ARRAYSIZE integers, this'll be 200
-; they are all random between LOW and HIGH
-; display integers before sorting
-;	I'm thinking for this, I'll use this display PROC but
-;	modify it so that it just fills the array, then 
-;	have another proc that actually goes through it all
-;	and then prints every value instead of putting a random
-;	int in it
-;sort the list in ascended order
-;	now this will be tough, I'm thinking, go through array,
-;	with the same display proc: Note, I'll just turn it into
-;	an array iteration proc. Or just copy paste code. But
-;	take a number, do the iterate array, if it's less than 
-;	push it that step + 4, and then at the end you can just
+
 
 .code
 main PROC
@@ -103,6 +84,9 @@ call	write
 push	OFFSET list		; 4
 push	count
 call	sortList
+push	OFFSET list		; 4
+push	count
+call	displayMedian
 push	OFFSET list
 push	count
 push	20
@@ -205,6 +189,7 @@ inc		eax
 add		esi,4 ;next element
 jmp	sortLoop
 endSort:
+
 call	CrLf
 mov		edx, OFFSET sorted
 call	WriteString
@@ -247,6 +232,32 @@ pop		eax
 ret 
 
 exchangeElements	ENDP
+
+displayMedian		PROC
+push ebp
+mov ebp,esp
+mov esi,[ebp+12] ;@list
+mov ecx,[ebp+8] ;ecx is loop control
+mov	eax, 0	; getting the median
+
+more:
+mov edx,[esi] ;get current element
+add	eax, edx ; add number and divide by 200 later
+add esi,4 ;next element
+loop more
+endMore:
+
+mov		ebx, ARRAYSIZE
+xor		edx, edx
+div		ebx
+call	CrLf
+call	WriteDec	; shows median
+call	CrLf
+
+pop ebp
+ret 8
+
+displayMedian		ENDP
 
 
 
