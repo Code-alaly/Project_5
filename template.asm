@@ -21,7 +21,8 @@ ARRAYSIZE = 200
 list	DWORD	ARRAYSIZE DUP (?)
 count	DWORD	ARRAYSIZE
 blank	DWORD	'  ', 0
-sorted	DWORD	ARRAYSIZE
+sorted	BYTE	"Here is the array as a sorted array", 0
+
 
 ; (insert variable definitions here)
 
@@ -102,6 +103,10 @@ call	write
 push	OFFSET list		; 4
 push	count
 call	sortList
+push	OFFSET list
+push	count
+push	20
+call	write
 ; call	sortList
 
 
@@ -175,7 +180,7 @@ call	CrLf
 
 ending:
 add esi,4 ;next element
-loop more
+loop writeLoop
 writeEnd:
 ; at the end of the loopz
 pop ebp
@@ -195,13 +200,15 @@ mov	eax, 1 ; eax will be counter
 sortLoop:
 cmp		eax, ecx	; if we've gone through, it's done sorting
 jge		endSort
-push	eax
-push	esi
 call	exchangeElements
 inc		eax
 add		esi,4 ;next element
 jmp	sortLoop
 endSort:
+call	CrLf
+mov		edx, OFFSET sorted
+call	WriteString
+call	CrLf
 
 pop ebp
 ret 8
@@ -210,28 +217,28 @@ ret 8
 sortList	ENDP
 
 exchangeElements	PROC
-
+push	eax
+push	esi
 
 exchangeLoop:
 mov		ebx, [esi] ; put current value in ebx
 mov		edx, [esi-4] ; put value before in edx
 cmp		eax, 0
-je		endExcange
+je		endExchange
 
 cmp	edx, ebx
 jge	switch
-jmp	nextInt
+jmp	endExchange
 
 switch:
-push	ebx
-push	edx
-pop		ebx
-pop		edx
-
-nextInt:
+mov		[esi], edx
+mov		[esi-4], ebx
 dec		eax
-add		esi, 4
+sub		esi, 4
 jmp		exchangeLoop
+
+
+
 
 
 endExchange:
