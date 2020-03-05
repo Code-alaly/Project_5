@@ -1,15 +1,17 @@
-Microsoft (R) Macro Assembler Version 14.24.28314.0	    02/24/20 17:14:18
-#Program Template     (template.asm			     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.24.28315.0	    03/02/20 19:39:45
+7Counting and Sorting Random Integers     (template.asm	     Page 1 - 1
 
 
-				TITLE Program Template     (template.asm)
+				TITLE Counting and Sorting Random Integers     (template.asm)
 
-				; Author:
-				; Last Modified:
-				; OSU email address: 
-				; Course number/section:
-				; Project Number:                 Due Date:
-				; Description:
+				; Author: Daniel Dubisz
+				; Last Modified: 3/1/2020
+				; OSU email address: dubiszd@oregonstate.edu
+				; Course number/section: 271
+				; Project Number: 5                Due Date: 3/2/2020
+				; Description: Program that creates an array of random integers,
+				; displays them, then displays median, then sorts and displays,
+				; then displays an array of how many times each value is in the array.
 
 				INCLUDE Irvine32.inc
 			      C ; Include file for Irvine32.lib             (Irvine32.inc)
@@ -35,7 +37,7 @@ Microsoft (R) Macro Assembler Version 14.24.28314.0	    02/24/20 17:14:18
  = 000000C8			ARRAYSIZE = 200
 
 
-				; (insert constant definitions here)
+
 
  00000000			.data
 
@@ -43,264 +45,415 @@ Microsoft (R) Macro Assembler Version 14.24.28314.0	    02/24/20 17:14:18
 	    00000000
 	   ]
  00000320 000000C8		count	DWORD	ARRAYSIZE
- 00000324 00002020		blank	DWORD	'  ', 0
+ 00000324 00002020		blank	DWORD	'  ', 0 ; spaces between numbers
 	   00000000
- 0000032C 48 65 72 65 20	sorted	BYTE	"Here is the array as a sorted array", 0
-	   69 73 20 74 68
-	   65 20 61 72 72
-	   61 79 20 61 73
-	   20 61 20 73 6F
-	   72 74 65 64 20
-	   61 72 72 61 79
+ 0000032C  00000014 [		counts	DWORD	20 DUP (0) ; array of times each int is in list
+	    00000000
+	   ]
+ 0000037C 50 72 6F 67 72	author	BYTE	"Programmed by Daniel", 0
+	   61 6D 6D 65 64
+	   20 62 79 20 44
+	   61 6E 69 65 6C
 	   00
+ 00000391 43 6F 75 6E 74	pTitle	BYTE	"Counting and Sorting Randome Integers				", 0
+	   69 6E 67 20 61
+	   6E 64 20 53 6F
+	   72 74 69 6E 67
+	   20 52 61 6E 64
+	   6F 6D 65 20 49
+	   6E 74 65 67 65
+	   72 73 09 09 09
+	   09 00
+ 000003BB 54 68 69 73 20	note	BYTE	"This program generates 200 random numbers in the range [10 ... 29], displays the original list, sorts the list, displays the median value, displays the list sorted in ascending order, then displays the number of instances of each generated value.", 0
+	   70 72 6F 67 72
+	   61 6D 20 67 65
+	   6E 65 72 61 74
+	   65 73 20 32 30
+	   30 20 72 61 6E
+	   64 6F 6D 20 6E
+	   75 6D 62 65 72
+	   73 20 69 6E 20
+	   74 68 65 20 72
+	   61 6E 67 65 20
+	   5B 31 30 20 2E
+	   2E 2E 20 32 39
+	   5D 2C 20 64 69
+	   73 70 6C 61 79
+	   73 20 74 68 65
+	   20 6F 72 69 67
+	   69 6E 61 6C 20
+	   6C 69 73 74 2C
+	   20 73 6F 72 74
+	   73 20 74 68 65
+	   20 6C 69 73 74
+	   2C 20 64 69 73
+	   70 6C 61 79 73
+	   20 74 68 65 20
+	   6D 65 64 69 61
+	   6E 20 76 61 6C
+	   75 65 2C 20 64
+	   69 73 70 6C 61
+	   79 73 20 74 68
+	   65 20 6C 69 73
+	   74 20 73 6F 72
+	   74 65 64 20 69
+	   6E 20 61 73 63
+	   65 6E 64 69 6E
+	   67 20 6F 72 64
+	   65 72 2C 20 74
+	   68 65 6E 20 64
+	   69 73 70 6C 61
+	   79 73 20 74 68
+	   65 20 6E 75 6D
+	   62 65 72 20 6F
+	   66 20 69 6E 73
+	   74 61 6E 63 65
+	   73 20 6F 66 20
+	   65 61 63 68 20
+	   67 65 6E 65 72
+	   61 74 65 64 20
+	   76 61 6C 75 65
+	   2E 00
+ 000004B2 59 6F 75 72 20	sorted	BYTE	"Your sorted random numbers: ", 0
+	   73 6F 72 74 65
+	   64 20 72 61 6E
+	   64 6F 6D 20 6E
+	   75 6D 62 65 72
+	   73 3A 20 00
+ 000004CF 59 6F 75 72 20	unsort	BYTE	"Your unsorted random numbers: ", 0
+	   75 6E 73 6F 72
+	   74 65 64 20 72
+	   61 6E 64 6F 6D
+	   20 6E 75 6D 62
+	   65 72 73 3A 20
+	   00
+ 000004EE 4C 69 73 74 20	med		BYTE	"List Median: ", 0
+	   4D 65 64 69 61
+	   6E 3A 20 00
+ 000004FC 59 6F 75 72 20	inst	BYTE	"Your list of isntances of each generated number, starting with the number of 10's: ", 0
+	   6C 69 73 74 20
+	   6F 66 20 69 73
+	   6E 74 61 6E 63
+	   65 73 20 6F 66
+	   20 65 61 63 68
+	   20 67 65 6E 65
+	   72 61 74 65 64
+	   20 6E 75 6D 62
+	   65 72 2C 20 73
+	   74 61 72 74 69
+	   6E 67 20 77 69
+	   74 68 20 74 68
+	   65 20 6E 75 6D
+	   62 65 72 20 6F
+	   66 20 31 30 27
+	   73 3A 20 00
+ 00000550 47 6F 6F 64 62	bye		BYTE	"Goodbye, thanks for utilizing this! ", 0
+	   79 65 2C 20 74
+	   68 61 6E 6B 73
+	   20 66 6F 72 20
+	   75 74 69 6C 69
+	   7A 69 6E 67 20
+	   74 68 69 73 21
+	   20 00
 
 
-				; (insert variable definitions here)
-
-
-
-
-				; Introduction
-
-				; FIll array
-					; generate an array of ARRAYSIZE integers, this'll be 200
-					; they are all random between LOW and HIGH
-					; use iterateList, then each thing list gives you, give it a random
-					; number 
-					
-
-				; sortList
-					; will have another array with blank 200, then, iterate through unsorted
-					; array, take value, iterate through sorted array, update count, update count,
-					; I think it should be fine
-
-					; exchangeElements
-					; this is where I'll have most of the meat happen
-
-				; displayMedian
-					; iterate list, except each return gets added, 
-					; then at end divide
-
-				; displayList
-					; iterate through list, except each term displayed, 
-					; this will just be displaying your list
-
-				; countList
-					; iterate through list, each time thing is shown, put it
-					; into other array, I guess just put it in OFFSET of like 10
-					; is 0 so you'll be able to math that out, at the end, display
-					; it
-
-
-				;WOWEE WOW THIS WILL BE LONG. But, leggo yo. 
-
-					
-				; what this does, is it takes the list pointer, 
-				; puts ecx to counter, then edx is the pointer element
-				; then it goes into a loop where it looks at each element
-				; in the array and prints it out, until it gets to the end of 
-				; whats in counter. 
 
 
 
  00000000			.code
  00000000			main PROC
- 00000000  68 00000000 R	push	OFFSET list		; 4
- 00000005  FF 35 00000320 R	push	count
- 0000000B  E8 0000004B		call	random
- 00000010  68 00000000 R	push	OFFSET list
- 00000015  FF 35 00000320 R	push	count
- 0000001B  6A 14		push	20
- 0000001D  E8 0000005E		call	write
- 00000022  68 00000000 R	push	OFFSET list		; 4
- 00000027  FF 35 00000320 R	push	count
- 0000002D  E8 00000088		call	sortList
- 00000032  68 00000000 R	push	OFFSET list		; 4
- 00000037  FF 35 00000320 R	push	count
- 0000003D  E8 000000D0		call	displayMedian
- 00000042  68 00000000 R	push	OFFSET list
- 00000047  FF 35 00000320 R	push	count
- 0000004D  6A 14		push	20
- 0000004F  E8 0000002C		call	write
+ 00000000  E8 00000000 E	call	Randomize ; seeds random generator
+ 00000005  E8 00000083		call	greeting
+ 0000000A  68 00000000 R	push	OFFSET list		
+ 0000000F  FF 35 00000320 R	push	count
+ 00000015  E8 000000A1		call	random
+ 0000001A  68 00000000 R	push	OFFSET list
+ 0000001F  FF 35 00000320 R	push	count
+ 00000025  6A 14		push	20	; uses to keep track of when to put new line
+ 00000027  E8 000000C3		call	write
+ 0000002C  68 00000000 R	push	OFFSET list		
+ 00000031  FF 35 00000320 R	push	count
+ 00000037  E8 00000145		call	displayMedian
+ 0000003C  68 00000000 R	push	OFFSET list		
+ 00000041  FF 35 00000320 R	push	count
+ 00000047  E8 000000E2		call	sortList
+ 0000004C  68 00000000 R	push	OFFSET list
+ 00000051  FF 35 00000320 R	push	count
+ 00000057  6A 14		push	20
+ 00000059  E8 00000091		call	write
+ 0000005E  68 00000000 R	push	OFFSET list
+ 00000063  FF 35 00000320 R	push	count
+ 00000069  68 0000032C R	push	OFFSET counts
+ 0000006E  E8 0000014B		call	countList
+ 00000073  68 0000032C R	push	OFFSET counts
+ 00000078  6A 14		push	20	
+ 0000007A  6A 14		push	20
+ 0000007C  E8 0000006E		call	write
+ 00000081  E8 00000172		call	goodBye
+
 				; call	sortList
 
 
 
 				exit	; exit to operating system
- 00000054  6A 00	   *	    push   +000000000h
- 00000056  E8 00000000 E   *	    call   ExitProcess
- 0000005B			main ENDP
-				;	
- 0000005B			random PROC
- 0000005B  55			push ebp
- 0000005C  8B EC		mov ebp,esp
- 0000005E  8B 75 0C		mov esi,[ebp+12] ;@list
- 00000061  8B 4D 08		mov ecx,[ebp+8] ;ecx is loop control
- 00000064			randomLoop:
- 00000064  B8 0000001D		mov eax,HI ;31
- 00000069  83 E8 0A		sub eax,LO ;31-18 = 13
- 0000006C  40			inc eax ;14
- 0000006D  E8 00000000 E	call RandomRange ;eax in [0..13]
- 00000072  83 C0 0A		add eax,LO ;eax in [18..31]
- 00000075  89 06		mov	[esi], eax
- 00000077  83 C6 04		add esi,4 ;next element
- 0000007A  E2 E8		loop randomLoop
- 0000007C			RandomEnd:
- 0000007C  5D			pop ebp
- 0000007D  C2 0008		ret 8
+ 00000086  6A 00	   *	    push   +000000000h
+ 00000088  E8 00000000 E   *	    call   ExitProcess
+ 0000008D			main ENDP
 
- 00000080			random	ENDP
+				;Procedure to introduce the program.
+				;receives: none
+				;returns: none
+				;preconditions:  none
+				;registers changed: edx
+ 0000008D			greeting PROC
 
+ 0000008D  BA 00000391 R	mov		edx, OFFSET pTitle
+ 00000092  E8 00000000 E	call	WriteString
+ 00000097  BA 0000037C R	mov		edx, OFFSET author
+ 0000009C  E8 00000000 E	call	WriteString
+ 000000A1  E8 00000000 E	call	CrLf
+ 000000A6  BA 000003BB R	mov		edx, OFFSET note
+ 000000AB  E8 00000000 E	call	WriteString
+ 000000B0  E8 00000000 E	call	CrLf
+ 000000B5  E8 00000000 E	call	CrLf
 
-				COMMENT #
+ 000000BA  C3			ret
 
-				; iterate PROC
-				push ebp
-				mov ebp,esp
-				mov esi,[ebp+12] ;@list
-				mov ecx,[ebp+8] ;ecx is loop control
-				more:
-				mov eax,[esi] ;get current element
-				call step ; 16
-				add esi,4 ;next element
-				loop more
-				endMore:
-				mov	step, 0	; at the end of the loopz
-				pop ebp
-				ret 8
-				iterate ENDP
-				#
+ 000000BB			greeting ENDP
+				;Procedure to fill list with random ints, creates stack to do so
+				;receives: list, count passed onto stack
+				;returns: list filled with random ints
+				;preconditions:  HI and LO must have ints of the range you want you array to be filled with
+				; count must have the size of the array. 
+				;registers changed: edx, esp, esi holds list, ecx holds count, eax holds various ints 
 
- 00000080			write	PROC
+ 000000BB			random PROC
+ 000000BB  BA 000004CF R	mov	 edx, OFFSET unsort
+ 000000C0  E8 00000000 E	call WriteString
+ 000000C5  E8 00000000 E	call CrLf
+ 000000CA  55			push ebp
+ 000000CB  8B EC		mov ebp,esp
+ 000000CD  8B 75 0C		mov esi,[ebp+12] ;@list
+ 000000D0  8B 4D 08		mov ecx,[ebp+8] ;ecx is loop control
+				; works cited: 
+				; powerpoint slide on randomRange from lectures
+ 000000D3			randomLoop:
+ 000000D3  B8 0000001D		mov eax,HI ;31
+ 000000D8  83 E8 0A		sub eax,LO ;31-18 = 13
+ 000000DB  40			inc eax ;14
+ 000000DC  E8 00000000 E	call RandomRange ;eax in [0..13]
+ 000000E1  83 C0 0A		add eax,LO ;eax in [18..31]
+ 000000E4  89 06		mov	[esi], eax
+ 000000E6  83 C6 04		add esi,4 ;next element
+ 000000E9  E2 E8		loop randomLoop
+ 000000EB			RandomEnd:
+ 000000EB  5D			pop ebp
+ 000000EC  C2 0008		ret 8
 
- 00000080  55			push ebp
- 00000081  8B EC		mov ebp,esp
- 00000083  8B 75 10		mov esi,[ebp+16] ;@list
- 00000086  8B 4D 0C		mov ecx,[ebp+12] ;ecx is loop control
- 00000089  8B 55 08		mov	edx,[ebp+8]	 ; edx counts how many spaces
+ 000000EF			random	ENDP
 
- 0000008C			writeLoop:
- 0000008C  8B 06		mov eax,[esi] ;get current element
- 0000008E  52			push	edx ; so we can use it for write
- 0000008F  BA 00000324 R	mov		edx, OFFSET blank
- 00000094  E8 00000000 E	call	WriteString
- 00000099  E8 00000000 E	call	WriteDec
- 0000009E  5A			pop		edx	; so we use it for main function, iteration
- 0000009F  4A			dec		edx
- 000000A0  83 FA 00		cmp		edx, 0
- 000000A3  74 02		je		space
- 000000A5  EB 0A		jmp		ending
+				;Procedure to print out values in an array, creates stack to do so
+				;receives: array(what we iterate through), count (how large the array is), and 20, to see when we need a new line
+				;returns: none, prints out each item in array pushed on and returns stack
+				;preconditions:  all things recieved must be pushed on before hand. 
+				;registers changed: edx, esi, ecx
 
- 000000A7			space:
- 000000A7  BA 00000014		mov		edx, 20
- 000000AC  E8 00000000 E	call	CrLf
+ 000000EF			write	PROC
 
- 000000B1			ending:
- 000000B1  83 C6 04		add esi,4 ;next element
- 000000B4  E2 D6		loop writeLoop
- 000000B6			writeEnd:
-				; at the end of the loopz
- 000000B6  5D			pop ebp
- 000000B7  C2 000C		ret 12
- 000000BA			write	ENDP
+ 000000EF  55			push ebp
+ 000000F0  8B EC		mov ebp,esp
+ 000000F2  8B 75 10		mov esi,[ebp+16] ;@list
+ 000000F5  8B 4D 0C		mov ecx,[ebp+12] ;ecx is loop control
+ 000000F8  8B 55 08		mov	edx,[ebp+8]	 ; edx counts how many spaces
 
+ 000000FB			writeLoop:
+ 000000FB  83 FA 14		cmp		edx, 20 ; if first number, no space
+ 000000FE  74 0C		je		noSpace
+ 00000100  52			push	edx ; so we can use it for write
+ 00000101  BA 00000324 R	mov		edx, OFFSET blank
+ 00000106  E8 00000000 E	call	WriteString
+ 0000010B  5A			pop		edx	; so we use it for main function, iteration
+ 0000010C			noSpace:
+ 0000010C  8B 06		mov eax,[esi] ;get current element
+ 0000010E  E8 00000000 E	call	WriteDec
+ 00000113  4A			dec		edx
+ 00000114  83 FA 00		cmp		edx, 0
+ 00000117  74 02		je		space
+ 00000119  EB 0A		jmp		ending
 
+ 0000011B			space:
+ 0000011B  BA 00000014		mov		edx, 20
+ 00000120  E8 00000000 E	call	CrLf
 
- 000000BA			sortList	PROC
+ 00000125			ending:
+ 00000125  83 C6 04		add esi,4 ;next element
+ 00000128  E2 D1		loop writeLoop
+ 0000012A			writeEnd:
+				; at the end of the loop
+ 0000012A  5D			pop ebp
+ 0000012B  C2 000C		ret 12
+ 0000012E			write	ENDP
 
- 000000BA  55			push ebp
- 000000BB  8B EC		mov ebp,esp
- 000000BD  8B 75 0C		mov esi,[ebp+12] ;@list
- 000000C0  8B 4D 08		mov ecx,[ebp+8] ;ecx is how far up to go
- 000000C3  83 C6 04		add	esi, 4		; starts on the second element
- 000000C6  B8 00000001		mov	eax, 1 ; eax will be counter
- 000000CB			sortLoop:
- 000000CB  3B C1		cmp		eax, ecx	; if we've gone through, it's done sorting
- 000000CD  7D 0B		jge		endSort
- 000000CF  E8 0000001E		call	exchangeElements
- 000000D4  40			inc		eax
- 000000D5  83 C6 04		add		esi,4 ;next element
- 000000D8  EB F1		jmp	sortLoop
- 000000DA			endSort:
+				;Procedure to sort the array given, creates stack to do so
+				;receives: list, count
+				;returns: sorted array that it was given.
+				;preconditions: random PROC must have been called, or it will be an empty array.
+				;registers changed: edx, eax, esi, ecx
 
- 000000DA  E8 00000000 E	call	CrLf
- 000000DF  BA 0000032C R	mov		edx, OFFSET sorted
- 000000E4  E8 00000000 E	call	WriteString
- 000000E9  E8 00000000 E	call	CrLf
-
- 000000EE  5D			pop ebp
- 000000EF  C2 0008		ret 8
-
-
- 000000F2			sortList	ENDP
-
- 000000F2			exchangeElements	PROC
- 000000F2  50			push	eax
- 000000F3  56			push	esi
-
- 000000F4			exchangeLoop:
- 000000F4  8B 1E		mov		ebx, [esi] ; put current value in ebx
- 000000F6  8B 56 FC		mov		edx, [esi-4] ; put value before in edx
- 000000F9  83 F8 00		cmp		eax, 0
- 000000FC  74 11		je		endExchange
-
- 000000FE  3B D3		cmp	edx, ebx
- 00000100  7D 02		jge	switch
- 00000102  EB 0B		jmp	endExchange
-
- 00000104			switch:
- 00000104  89 16		mov		[esi], edx
- 00000106  89 5E FC		mov		[esi-4], ebx
- 00000109  48			dec		eax
- 0000010A  83 EE 04		sub		esi, 4
- 0000010D  EB E5		jmp		exchangeLoop
+ 0000012E			sortList	PROC
+ 0000012E  BA 000004B2 R	mov		edx, OFFSET sorted
+ 00000133  E8 00000000 E	call	WriteString
+ 00000138  E8 00000000 E	call	CrLf
+ 0000013D  55			push ebp
+ 0000013E  8B EC		mov ebp,esp
+ 00000140  8B 75 0C		mov esi,[ebp+12] ;@list
+ 00000143  8B 4D 08		mov ecx,[ebp+8] ;ecx is how far up to go
+ 00000146  83 C6 04		add	esi, 4		; starts on the second element
+ 00000149  B8 00000001		mov	eax, 1 ; eax will be counter
+ 0000014E			sortLoop:
+ 0000014E  3B C1		cmp		eax, ecx	; if we've gone through, it's done sorting
+ 00000150  7D 0B		jge		endSort
+ 00000152  E8 0000000A		call	exchangeElements
+ 00000157  40			inc		eax
+ 00000158  83 C6 04		add		esi,4 ;next element
+ 0000015B  EB F1		jmp	sortLoop
+ 0000015D			endSort:
 
 
+ 0000015D  5D			pop ebp
+ 0000015E  C2 0008		ret 8
+
+
+ 00000161			sortList	ENDP
+
+				;Procedure to take the number given from sortList and put it in the correct spot in list
+				;receives: esi from calling procedure sortList
+				;returns: pops eax and esi back before returing, to be used by sortList more
+				;preconditions:  sortList must have been called
+				;registers changed: edx, ebx, eax, esi
+
+ 00000161			exchangeElements	PROC
+ 00000161  50			push	eax ; save eax, esi to be used by calling proc later
+ 00000162  56			push	esi
+
+
+				; works cited: 
+				; gnome sort from http://www.miguelcasillas.com/?mcportfolio=sorting-algorithms-asm-x86
+ 00000163			exchangeLoop:
+ 00000163  8B 1E		mov		ebx, [esi] ; put current value in ebx
+ 00000165  8B 56 FC		mov		edx, [esi-4] ; put value before in edx
+ 00000168  83 F8 00		cmp		eax, 0
+ 0000016B  74 11		je		endExchange
+
+ 0000016D  3B D3		cmp	edx, ebx
+ 0000016F  7D 02		jge	switch
+ 00000171  EB 0B		jmp	endExchange
+
+ 00000173			switch:
+ 00000173  89 16		mov		[esi], edx
+ 00000175  89 5E FC		mov		[esi-4], ebx
+ 00000178  48			dec		eax
+ 00000179  83 EE 04		sub		esi, 4
+ 0000017C  EB E5		jmp		exchangeLoop
+
+ 0000017E			endExchange:
+ 0000017E  5E			pop		esi
+ 0000017F  58			pop		eax
+ 00000180  C3			ret 
+
+ 00000181			exchangeElements	ENDP
+
+				;Procedure to create a stack, loop through list and find the median of the values in that array
+				;receives: list, count
+				;returns: prints out median and then returns
+				;preconditions:  list and count must be set
+				;registers changed: edx, esi, eax, ebx
+
+ 00000181			displayMedian		PROC
+ 00000181  55			push ebp
+ 00000182  8B EC		mov ebp,esp
+ 00000184  8B 75 0C		mov esi,[ebp+12] ;@list
+ 00000187  8B 4D 08		mov ecx,[ebp+8] ;ecx is loop control
+ 0000018A  B8 00000000		mov	eax, 0	; getting the median
+
+ 0000018F			more:
+ 0000018F  8B 16		mov edx,[esi] ;get current element
+ 00000191  03 C2		add	eax, edx ; add number and divide by 200 later
+ 00000193  83 C6 04		add esi,4 ;next element
+ 00000196  E2 F7		loop more
+ 00000198			endMore:
+
+ 00000198  BB 000000C8		mov		ebx, ARRAYSIZE
+ 0000019D  33 D2		xor		edx, edx
+ 0000019F  F7 F3		div		ebx
+ 000001A1  E8 00000000 E	call	CrLf
+ 000001A6  BA 000004EE R	mov		edx, OFFSET med
+ 000001AB  E8 00000000 E	call	WriteString
+ 000001B0  E8 00000000 E	call	WriteDec	; shows median
+ 000001B5  E8 00000000 E	call	CrLf
+
+ 000001BA  5D			pop ebp
+ 000001BB  C2 0008		ret 8
+
+ 000001BE			displayMedian		ENDP
+
+				;Procedure to create stack, go through list, see how many times each int shows up,
+				; and then increments that point in counts. i.e, if there is a 10 in list, then counts[0] would increase by 1, and so on...
+				;receives: list, count, counts
+				;returns: counts array is now holding how many times each value appears in list
+				;preconditions:  random proc must have already been run
+				;registers changed: edx, eax, esi, ecx, 
+ 000001BE			countList			PROC
+ 000001BE  E8 00000000 E	call CrLf
+ 000001C3  BA 000004FC R	mov	edx, OFFSET inst
+ 000001C8  E8 00000000 E	call WriteString
+ 000001CD  E8 00000000 E	call CrLf
+ 000001D2  55			push ebp
+ 000001D3  8B EC		mov ebp,esp
+ 000001D5  8B 75 10		mov esi,[ebp+16] ;@list
+ 000001D8  8B 4D 0C		mov ecx,[ebp+12] ;ecx is loop control
+
+ 000001DB			more:
+ 000001DB  8B 16		mov edx,[esi] ;get current element
+ 000001DD  56			push esi ; saves esi
+ 000001DE  8B 75 08		mov  esi, [ebp+8] ; move esi to counts
+ 000001E1  83 EA 0A		sub	edx, 10	; grabs number between 0 and 18
+ 000001E4  6B D2 04		imul edx, 4 ; multiplies it by 4
+ 000001E7  8B 04 16		mov	eax, [esi + edx] ; that is the spot on the array we increment
+ 000001EA  40			inc	eax
+ 000001EB  89 04 16		mov [esi + edx], eax
+ 000001EE  5E			pop	esi ; gives back esi to keep looping through array
+ 000001EF  83 C6 04		add esi,4 ;next element
+ 000001F2  E2 E7		loop more
+
+ 000001F4			endMore:
+ 000001F4  5D			pop ebp
+ 000001F5  C2 000C		ret 12
+
+ 000001F8			CountList			ENDP
+
+				;Procedure to say goodbye to user
+				;receives: none
+				;returns: none
+				;preconditions:  none
+				;registers changed: edx
+ 000001F8			goodBye		PROC
+ 000001F8  E8 00000000 E	call	CrLf
+ 000001FD  E8 00000000 E	call	CrLf
+ 00000202  E8 00000000 E	call	CrLf
+ 00000207  BA 00000550 R	mov		edx, OFFSET bye
+ 0000020C  E8 00000000 E	call	WriteString
+
+ 00000211  C3			ret
+ 00000212			goodBye		ENDP
 
 
 
- 0000010F			endExchange:
- 0000010F  5E			pop		esi
- 00000110  58			pop		eax
- 00000111  C3			ret 
 
- 00000112			exchangeElements	ENDP
-
- 00000112			displayMedian		PROC
- 00000112  55			push ebp
- 00000113  8B EC		mov ebp,esp
- 00000115  8B 75 0C		mov esi,[ebp+12] ;@list
- 00000118  8B 4D 08		mov ecx,[ebp+8] ;ecx is loop control
- 0000011B  B8 00000000		mov	eax, 0	; getting the median
-
- 00000120			more:
- 00000120  8B 16		mov edx,[esi] ;get current element
- 00000122  03 C2		add	eax, edx ; add number and divide by 200 later
- 00000124  83 C6 04		add esi,4 ;next element
- 00000127  E2 F7		loop more
- 00000129			endMore:
-
- 00000129  BB 000000C8		mov		ebx, ARRAYSIZE
- 0000012E  33 D2		xor		edx, edx
- 00000130  F7 F3		div		ebx
- 00000132  E8 00000000 E	call	CrLf
- 00000137  E8 00000000 E	call	WriteDec
- 0000013C  E8 00000000 E	call	CrLf
-
- 00000141  5D			pop ebp
- 00000142  C2 0008		ret 8
-
- 00000145			displayMedian		ENDP
-
-
-
-
-
-				; (insert additional procedures here)
 
 				END main
-Microsoft (R) Macro Assembler Version 14.24.28314.0	    02/24/20 17:14:18
-#Program Template     (template.asm			     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.24.28315.0	    03/02/20 19:39:45
+7Counting and Sorting Random Integers     (template.asm	     Symbols 2 - 1
 
 
 
@@ -393,8 +546,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000350 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000145 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000575 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000212 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -501,27 +654,33 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-displayMedian  . . . . . . . . .	P Near	 00000112 _TEXT	Length= 00000033 Public STDCALL
-  more . . . . . . . . . . . . .	L Near	 00000120 _TEXT	
-  endMore  . . . . . . . . . . .	L Near	 00000129 _TEXT	
-exchangeElements . . . . . . . .	P Near	 000000F2 _TEXT	Length= 00000020 Public STDCALL
-  exchangeLoop . . . . . . . . .	L Near	 000000F4 _TEXT	
-  switch . . . . . . . . . . . .	L Near	 00000104 _TEXT	
-  endExchange  . . . . . . . . .	L Near	 0000010F _TEXT	
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000005B Public STDCALL
+countList  . . . . . . . . . . .	P Near	 000001BE _TEXT	Length= 0000003A Public STDCALL
+  more . . . . . . . . . . . . .	L Near	 000001DB _TEXT	
+  endMore  . . . . . . . . . . .	L Near	 000001F4 _TEXT	
+displayMedian  . . . . . . . . .	P Near	 00000181 _TEXT	Length= 0000003D Public STDCALL
+  more . . . . . . . . . . . . .	L Near	 0000018F _TEXT	
+  endMore  . . . . . . . . . . .	L Near	 00000198 _TEXT	
+exchangeElements . . . . . . . .	P Near	 00000161 _TEXT	Length= 00000020 Public STDCALL
+  exchangeLoop . . . . . . . . .	L Near	 00000163 _TEXT	
+  switch . . . . . . . . . . . .	L Near	 00000173 _TEXT	
+  endExchange  . . . . . . . . .	L Near	 0000017E _TEXT	
+goodBye  . . . . . . . . . . . .	P Near	 000001F8 _TEXT	Length= 0000001A Public STDCALL
+greeting . . . . . . . . . . . .	P Near	 0000008D _TEXT	Length= 0000002E Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000008D Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-random . . . . . . . . . . . . .	P Near	 0000005B _TEXT	Length= 00000025 Public STDCALL
-  randomLoop . . . . . . . . . .	L Near	 00000064 _TEXT	
-  RandomEnd  . . . . . . . . . .	L Near	 0000007C _TEXT	
+random . . . . . . . . . . . . .	P Near	 000000BB _TEXT	Length= 00000034 Public STDCALL
+  randomLoop . . . . . . . . . .	L Near	 000000D3 _TEXT	
+  RandomEnd  . . . . . . . . . .	L Near	 000000EB _TEXT	
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-sortList . . . . . . . . . . . .	P Near	 000000BA _TEXT	Length= 00000038 Public STDCALL
-  sortLoop . . . . . . . . . . .	L Near	 000000CB _TEXT	
-  endSort  . . . . . . . . . . .	L Near	 000000DA _TEXT	
-write  . . . . . . . . . . . . .	P Near	 00000080 _TEXT	Length= 0000003A Public STDCALL
-  writeLoop  . . . . . . . . . .	L Near	 0000008C _TEXT	
-  space  . . . . . . . . . . . .	L Near	 000000A7 _TEXT	
-  ending . . . . . . . . . . . .	L Near	 000000B1 _TEXT	
-  writeEnd . . . . . . . . . . .	L Near	 000000B6 _TEXT	
+sortList . . . . . . . . . . . .	P Near	 0000012E _TEXT	Length= 00000033 Public STDCALL
+  sortLoop . . . . . . . . . . .	L Near	 0000014E _TEXT	
+  endSort  . . . . . . . . . . .	L Near	 0000015D _TEXT	
+write  . . . . . . . . . . . . .	P Near	 000000EF _TEXT	Length= 0000003F Public STDCALL
+  writeLoop  . . . . . . . . . .	L Near	 000000FB _TEXT	
+  noSpace  . . . . . . . . . . .	L Near	 0000010C _TEXT	
+  space  . . . . . . . . . . . .	L Near	 0000011B _TEXT	
+  ending . . . . . . . . . . . .	L Near	 00000125 _TEXT	
+  writeEnd . . . . . . . . . . .	L Near	 0000012A _TEXT	
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 
@@ -741,15 +900,19 @@ VK_UP  . . . . . . . . . . . . .	Number	 00000026h
 WINDOW_BUFFER_SIZE_EVENT . . . .	Number	 00000004h   
 WriteConsoleOutputCharacter  . .	Text   	 WriteConsoleOutputCharacterA
 WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
+author . . . . . . . . . . . . .	Byte	 0000037C _DATA	
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blank  . . . . . . . . . . . . .	DWord	 00000324 _DATA	
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
+bye  . . . . . . . . . . . . . .	Byte	 00000550 _DATA	
+counts . . . . . . . . . . . . .	DWord	 0000032C _DATA	
 count  . . . . . . . . . . . . .	DWord	 00000320 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
+inst . . . . . . . . . . . . . .	Byte	 000004FC _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -758,8 +921,12 @@ lightMagenta . . . . . . . . . .	Number	 0000000Dh
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 list . . . . . . . . . . . . . .	DWord	 00000000 _DATA	
 magenta  . . . . . . . . . . . .	Number	 00000005h   
+med  . . . . . . . . . . . . . .	Byte	 000004EE _DATA	
+note . . . . . . . . . . . . . .	Byte	 000003BB _DATA	
+pTitle . . . . . . . . . . . . .	Byte	 00000391 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-sorted . . . . . . . . . . . . .	Byte	 0000032C _DATA	
+sorted . . . . . . . . . . . . .	Byte	 000004B2 _DATA	
+unsort . . . . . . . . . . . . .	Byte	 000004CF _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
