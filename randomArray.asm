@@ -25,7 +25,7 @@ count	DWORD	ARRAYSIZE
 blank	DWORD	'  ', 0 ; spaces between numbers
 counts	DWORD	20 DUP (0) ; array of times each int is in list
 author	BYTE	"Programmed by Daniel", 0
-pTitle	BYTE	"Counting and Sorting Randome Integers				", 0
+pTitle	BYTE	"Counting and Sorting Random Integers				", 0
 note	BYTE	"This program generates 200 random numbers in the range [10 ... 29], displays the original list, sorts the list, displays the median value, displays the list sorted in ascending order, then displays the number of instances of each generated value.", 0
 sorted	BYTE	"Your sorted random numbers: ", 0
 unsort	BYTE	"Your unsorted random numbers: ", 0
@@ -40,10 +40,16 @@ bye		BYTE	"Goodbye, thanks for utilizing this! ", 0
 .code
 main PROC
 call	Randomize ; seeds random generator
+push	OFFSET note
+push	OFFSET author
+push	OFFSET pTitle
 call	greeting
+push	OFFSET unsort
+push	HI
 push	OFFSET list		
 push	count
 call	random
+push	OFFSET blank
 push	OFFSET list
 push	count
 push	20	; uses to keep track of when to put new line
@@ -54,6 +60,7 @@ call	displayMedian
 push	OFFSET list		
 push	count
 call	sortList
+push	OFFSET blank
 push	OFFSET list
 push	count
 push	20
@@ -82,12 +89,12 @@ main ENDP
 ;registers changed: edx
 greeting PROC
 
-mov		edx, OFFSET pTitle
+mov		pop edx
 call	WriteString
-mov		edx, OFFSET author
+mov		pop edx
 call	WriteString
 call	CrLf
-mov		edx, OFFSET note
+mov		pop edx
 call	WriteString
 call	CrLf
 call	CrLf
@@ -103,7 +110,7 @@ greeting ENDP
 ;registers changed: edx, esp, esi holds list, ecx holds count, eax holds various ints 
 
 random PROC
-mov	 edx, OFFSET unsort
+mov	 edx [ebp+20]
 call WriteString
 call CrLf
 push ebp
@@ -113,7 +120,7 @@ mov ecx,[ebp+8] ;ecx is loop control
 ; works cited: 
 ; powerpoint slide on randomRange from lectures
 randomLoop:
-mov eax,HI ;31
+mov	eax, [ebp+16]
 sub eax,LO ;31-18 = 13
 inc eax ;14
 call RandomRange ;eax in [0..13]
@@ -123,7 +130,7 @@ add esi,4 ;next element
 loop randomLoop
 RandomEnd:
 pop ebp
-ret 8
+ret 16
 
 random	ENDP
 
@@ -145,7 +152,7 @@ writeLoop:
 cmp		edx, 20 ; if first number, no space
 je		noSpace
 push	edx ; so we can use it for write
-mov		edx, OFFSET blank
+mov		edx, [ebp+20]
 call	WriteString
 pop		edx	; so we use it for main function, iteration
 noSpace:
