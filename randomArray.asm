@@ -40,6 +40,9 @@ bye		BYTE	"Goodbye, thanks for utilizing this! ", 0
 .code
 main PROC
 call	Randomize ; seeds random generator
+push	OFFSET note
+push	OFFSET author
+push	OFFSET pTitle
 call	greeting
 push	OFFSET list		
 push	count
@@ -82,21 +85,19 @@ main ENDP
 ;preconditions:  none
 ;registers changed: edx
 greeting PROC
-
-push	OFFSET note
-push	OFFSET author
-push	OFFSET pTitle
-pop		edx
+push	ebp
+mov		ebp, esp
+mov		edx, [ebp+8]
 call	WriteString
-pop		edx
+mov		edx, [ebp + 12]
 call	WriteString
 call	CrLf
-pop		edx
+mov		edx, [ebp + 16]
 call	WriteString
 call	CrLf
 call	CrLf
 
-
+pop ebp
 ret 
 
 greeting ENDP
