@@ -40,16 +40,10 @@ bye		BYTE	"Goodbye, thanks for utilizing this! ", 0
 .code
 main PROC
 call	Randomize ; seeds random generator
-push	OFFSET note
-push	OFFSET author
-push	OFFSET pTitle
 call	greeting
-push	OFFSET unsort
-push	HI
 push	OFFSET list		
 push	count
 call	random
-push	OFFSET blank
 push	OFFSET list
 push	count
 push	20	; uses to keep track of when to put new line
@@ -89,17 +83,21 @@ main ENDP
 ;registers changed: edx
 greeting PROC
 
-mov		pop edx
+push	OFFSET note
+push	OFFSET author
+push	OFFSET pTitle
+pop		edx
 call	WriteString
-mov		pop edx
+pop		edx
 call	WriteString
 call	CrLf
-mov		pop edx
+pop		edx
 call	WriteString
 call	CrLf
 call	CrLf
 
-ret
+
+ret 
 
 greeting ENDP
 ;Procedure to fill list with random ints, creates stack to do so
@@ -107,10 +105,11 @@ greeting ENDP
 ;returns: list filled with random ints
 ;preconditions:  HI and LO must have ints of the range you want you array to be filled with
 ; count must have the size of the array. 
-;registers changed: edx, esp, esi holds list, ecx holds count, eax holds various ints 
+;registers changed: edx, esp, esi holds list, ecx holds count, eax holds various ints, ebx holds hi, 
 
 random PROC
-mov	 edx [ebp+20]
+push OFFSET unsort
+pop	 edx 
 call WriteString
 call CrLf
 push ebp
@@ -119,18 +118,22 @@ mov esi,[ebp+12] ;@list
 mov ecx,[ebp+8] ;ecx is loop control
 ; works cited: 
 ; powerpoint slide on randomRange from lectures
+
 randomLoop:
-mov	eax, [ebp+16]
-sub eax,LO ;31-18 = 13
+push LO
+push HI
+pop eax ; HI
+pop ebx ; LO
+sub eax, ebx ;31-18 = 13
 inc eax ;14
 call RandomRange ;eax in [0..13]
-add eax,LO ;eax in [18..31]
+add eax,ebx ;eax in [18..31]
 mov	[esi], eax
 add esi,4 ;next element
 loop randomLoop
 RandomEnd:
 pop ebp
-ret 16
+ret 24
 
 random	ENDP
 
@@ -152,7 +155,8 @@ writeLoop:
 cmp		edx, 20 ; if first number, no space
 je		noSpace
 push	edx ; so we can use it for write
-mov		edx, [ebp+20]
+push	OFFSET blank
+pop		edx ; space
 call	WriteString
 pop		edx	; so we use it for main function, iteration
 noSpace:
@@ -183,7 +187,8 @@ write	ENDP
 ;registers changed: edx, eax, esi, ecx
 
 sortList	PROC
-mov		edx, OFFSET sorted
+push	OFFSET sorted
+pop		edx
 call	WriteString
 call	CrLf
 push ebp
@@ -264,12 +269,13 @@ add	eax, edx ; add number and divide by 200 later
 add esi,4 ;next element
 loop more
 endMore:
-
-mov		ebx, ARRAYSIZE
+push	OFFSET med
+push	ARRAYSIZE
+pop		ebx
 xor		edx, edx
 div		ebx
 call	CrLf
-mov		edx, OFFSET med
+pop		edx
 call	WriteString
 call	WriteDec	; shows median
 call	CrLf
@@ -287,7 +293,8 @@ displayMedian		ENDP
 ;registers changed: edx, eax, esi, ecx, 
 countList			PROC
 call CrLf
-mov	edx, OFFSET inst
+push OFFSET inst
+pop	 edx
 call WriteString
 call CrLf
 push ebp
@@ -322,8 +329,8 @@ CountList			ENDP
 goodBye		PROC
 call	CrLf
 call	CrLf
-call	CrLf
-mov		edx, OFFSET bye
+push	OFFSET bye
+pop		edx
 call	WriteString
 
 ret
